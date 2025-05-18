@@ -5,20 +5,20 @@ from datetime import datetime
 import json
 import os
 
-# --- Configurazioni base ---
+
 giorni_settimana = ["Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi", "Sabato", "Domenica"]
 mesi_italiano = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
                  "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 file_agenda = "agenda.json"
 
-# Carica agenda se esiste
+
 if os.path.exists(file_agenda):
     with open(file_agenda, "r", encoding="utf-8") as f:
         agenda = json.load(f)
 else:
     agenda = {}
 
-# --- Ottieni data corrente ---
+
 oggi = datetime.today()
 giorno_oggi = oggi.day
 mese_corrente = oggi.month
@@ -26,19 +26,15 @@ anno_corrente = oggi.year
 cal = calendar.Calendar(firstweekday=0)
 settimane = cal.monthdayscalendar(anno_corrente, mese_corrente)
 
-
-# --- Funzione per aprire finestra descrizione ---
 def apri_agenda(giorno):
     if giorno == 0:
         return
     data = f"{anno_corrente:04d}-{mese_corrente:02d}-{giorno:02d}"
     nota_corrente = agenda.get(data, "")
-
-    # Dialog per inserire nota
     nota = simpledialog.askstring("Agenda", f"Inserisci nota per il {data}:", initialvalue=nota_corrente)
 
     if nota is not None:
-        if nota.strip() == "":  # Se la nota è vuota, rimuove
+        if nota.strip() == "": 
             agenda.pop(data, None)
         else:
             agenda[data] = nota.strip()
@@ -46,11 +42,11 @@ def apri_agenda(giorno):
         with open(file_agenda, "w", encoding="utf-8") as f:
             json.dump(agenda, f, indent=4, ensure_ascii=False)
 
-        # Aggiorna il calendario senza resettare la finestra
+
         aggiorna_calendario()
 
 
-# --- Funzione per cambiare mese ---
+
 def cambia_mese(direzione):
     global mese_corrente, anno_corrente, settimane
     if direzione == "avanti":
@@ -67,27 +63,23 @@ def cambia_mese(direzione):
     cal.setfirstweekday(0)
     settimane = cal.monthdayscalendar(anno_corrente, mese_corrente)
 
-    # Aggiorna il calendario senza resettare la finestra
     aggiorna_calendario()
 
 
-# --- Funzione per aggiornare il calendario ---
+
 def aggiorna_calendario():
-    # Rimuove i widget esistenti nella griglia del calendario
     for widget in griglia.winfo_children():
         widget.destroy()
 
-    # Titolo mese aggiornato
     titolo.config(text=f"{mesi_italiano[mese_corrente - 1]} {anno_corrente}")
 
-    # Giorni della settimana
     for i, giorno in enumerate(giorni_settimana):
         cella = tk.Label(griglia, text=giorno, font=("Arial", 14, "bold"),
                          width=larghezza_cella, height=2,
                          bg="#2196f3", fg="#ffffff", relief="solid", bd=2)
         cella.grid(row=0, column=i, sticky="nsew", padx=2, pady=2)
 
-    # Giorni del mese
+
     for riga, settimana in enumerate(settimane, start=1):
         for colonna, giorno in enumerate(settimana):
             if giorno == 0:
@@ -110,7 +102,6 @@ def aggiorna_calendario():
                     bg_color = colore_sfondo
                     fg_color = "#333333"
 
-            # Bottone per giorno con effetto hover e bordi arrotondati
             btn = tk.Button(griglia, text=testo, font=("Arial", 12),
                             width=larghezza_cella, height=altezza_cella,
                             bg=bg_color, fg=fg_color,
@@ -120,47 +111,45 @@ def aggiorna_calendario():
 
             btn.grid(row=riga, column=colonna, sticky="nsew", padx=5, pady=5)
 
-    # Configurazione per fare espandere le righe e colonne
     for i in range(7):
         griglia.grid_columnconfigure(i, weight=1)
     for i in range(6):
         griglia.grid_rowconfigure(i, weight=1)
 
 
-# --- Funzione principale per creare calendario ---
+
 def crea_calendario():
     global root, titolo, griglia, larghezza_cella, altezza_cella, colore_sfondo, colore_bordo, colore_oggi_bg, colore_oggi_fg, colore_nota_bg, colore_nota_fg
 
-    # Impostazioni di stile
+
     larghezza_cella = 12
     altezza_cella = 4
     colore_sfondo = "#ffffff"
-    colore_bordo = "#1e88e5"  # Blu più soft
-    colore_oggi_bg = "#a5d6a7"  # Colore verde chiaro per il giorno di oggi
-    colore_oggi_fg = "#388e3c"  # Colore scuro per il giorno di oggi
-    colore_nota_bg = "#ffeb3b"  # Colore giallo per i giorni con note
-    colore_nota_fg = "#f57f17"  # Colore scuro per le note
+    colore_bordo = "#1e88e5" 
+    colore_oggi_bg = "#a5d6a7" 
+    colore_oggi_fg = "#388e3c"  
+    colore_nota_bg = "#ffeb3b" 
+    colore_nota_fg = "#f57f17"  
 
     root = tk.Tk()
     root.title("Calendario con Agenda")
-    root.configure(bg="#e3f2fd")  # Colore di sfondo chiaro e moderno
-    root.geometry("750x780")  # Maggiore spazio per una griglia più ampia
+    root.configure(bg="#e3f2fd") 
+    root.geometry("750x780")
 
-    # Barra superiore con mese e anno e frecce
     barra_mese = tk.Frame(root, bg="#2196f3", pady=10)
     barra_mese.pack(fill="x")
 
-    # Freccia sinistra
+
     freccia_sinistra = tk.Button(barra_mese, text="◀", font=("Arial", 16, "bold"),
                                  bg="#ffffff", fg="#2196f3", command=lambda: cambia_mese("indietro"))
     freccia_sinistra.pack(side="left", padx=10)
 
-    # Titolo mese
+
     titolo = tk.Label(barra_mese, text=f"{mesi_italiano[mese_corrente - 1]} {anno_corrente}",
                       font=("Arial", 22, "bold"), bg="#2196f3", fg="#ffffff")
     titolo.pack(side="left", expand=True)
 
-    # Freccia destra
+
     freccia_destra = tk.Button(barra_mese, text="▶", font=("Arial", 16, "bold"),
                                bg="#ffffff", fg="#2196f3", command=lambda: cambia_mese("avanti"))
     freccia_destra.pack(side="right", padx=10)
@@ -168,11 +157,9 @@ def crea_calendario():
     griglia = tk.Frame(root, bg="#ffffff")
     griglia.pack(pady=20)
 
-    # Aggiorna il calendario per il primo caricamento
     aggiorna_calendario()
 
     root.mainloop()
 
 
-# Avvia
 crea_calendario()
